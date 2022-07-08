@@ -5,7 +5,7 @@ Compile the code like this (tested on ubuntu):
   * make build && make cli srv
 
 Running the programs:
-  * fristly the server needs to be started: ./server
+  * fristly the host needs to start the server: ./server
   * now the clients can connect: ./client
   * when starting the client it will ask for a number to identify each ship. Two different clients could contorll the same ship.
   * When all ships are "red" either you could spawn in more ships to clear level or restart server.
