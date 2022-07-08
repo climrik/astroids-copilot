@@ -1,0 +1,44 @@
+Astroid-copilot v0 specifications
+
+Local two-multiplayer with split keyboard.
+Pause game, save game state, game settings.
+
+Gamestate
+Summary: The state of the game should be confined in this object.
+-Ships, Bullets and Astroid, positions and velocities
+-List of Ships
+-List of Astroids
+-List of Bullets
+-Handle collitions
+-Functions for get and put data.
+
+Shapes
+Ship: Triangle shape
+Bullets: Tiny dot
+Astroids: square, 3 sizes
+
+Collisions
+check all ships vs every astroid
+check all bullets vs every astroid
+
+Client
+Summary: The player uses this to interact with the game state. 
+-Input, forward player control into gamestate ship
+-Display, request info from gamestate
+
+Toggle menu - esc
+
+Player1 
+stear left - <-
+go forward - Arrow upp
+sear right - ->
+fire       - left + Ctrl
+
+Player2
+stear left - A
+go forward - W
+sear right - D
+fire       - X
+
+
+
