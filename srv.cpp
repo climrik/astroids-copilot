@@ -29,6 +29,10 @@ std::mt19937 gen(rd());
 std::uniform_real_distribution<> dis(0, 1);//uniform distribution between 0 and 1
 float world_height = 600;
 float world_width = 600;
+int restart_trigger = 30;
+int restart_count = 0;
+int level = 0;
+int spawn_amount = 1;
 
 Astroid safe_spawn_astroid()
 {
@@ -73,8 +77,8 @@ Astroid safe_spawn_astroid()
 }
 
 //network
-sf::IpAddress server_ip{"10.10.13.33"};
-//sf::IpAddress server_ip{"127.0.0.1"};
+//sf::IpAddress server_ip{"10.10.13.33"};
+sf::IpAddress server_ip{"127.0.0.1"};
 sf::IpAddress sender_ip;
 std::vector<std::tuple<sf::IpAddress, unsigned short>> clients;
 unsigned short server_port = 55100;
@@ -94,9 +98,10 @@ void thread_waiting(int n, sf::UdpSocket* socket) {
 	bool isRight;
 	bool isThrottle;
 	bool isFire;
+	bool is_restart;
 	socket->receive(packet, client_ip, client_port);
-	packet >> id >> isLeft >> isRight >> isThrottle >> isFire;
-	//std::cout << id << "	" << isLeft << isRight << isThrottle << isFire << std::endl;
+	packet >> id >> isLeft >> isRight >> isThrottle >> isFire >> is_restart;
+	//std::cout << id << "	" << isLeft << isRight << isThrottle << isFire << is_restart << std::endl;
 
 	//check if ship_id exists else make new ship
 	bool add_new_ship = true;
@@ -109,6 +114,7 @@ void thread_waiting(int n, sf::UdpSocket* socket) {
 			ships[i].isRight = isRight;
 			ships[i].isThrottle = isThrottle;
 			ships[i].isFire = isFire;
+			ships[i].is_restart = is_restart;
 		}
 	}
 	if (add_new_ship)
@@ -147,6 +153,18 @@ void thread_call(sf::UdpSocket* socket)
     detach_func(socket);
 }
 
+void init_game()
+{
+	//ships = std::vector<Ship>();
+	astroids = std::vector<Astroid>();
+	incoming_astroids = std::vector<Astroid*>();
+	bullets = std::vector<Bullet>();
+	level = 0;
+    spawn_amount = 1;
+	//astroids.push_back(Astroid(29, 300, 300, 0, 1));
+	safe_spawn_astroid();
+}
+
 int main ()
 {
 	std::cout << "Hello server" << std::endl;
@@ -155,9 +173,7 @@ int main ()
 	socket_selector.add(socket);
 	thread_call(&socket);
 
-    int level = 0;
-    int spawn_amount = 3;
-	astroids.push_back(Astroid(29, 300, 300, -1, 1));
+	init_game();
 
 	while (true)
 	{
@@ -190,10 +206,7 @@ int main ()
 		}
 
 		//check collision
-		//
-		// ... todo ...
-		//
-		// bullets vs astroids (also check fly_time)
+		// bullets vs astroids
 		float xdist;
 		float ydist;
 		float collision_distance;
@@ -283,12 +296,31 @@ int main ()
 				ships[i].isDead = false;
 			}
         } 
-		
+        
+        //check restart
+        bool want_to_restart = false;
+        for (int i = 0; i < ships.size(); ++i)
+        {
+			if (ships[i].is_restart)
+			{
+				want_to_restart = true;
+				break;
+			}
+		}
+		if (want_to_restart) {
+			restart_count++;
+		} else {
+			restart_count = 0;
+		}
+		if (restart_count > restart_trigger) {
+			std::cout << "RESTART" << std::endl;
+			init_game();
+			restart_count = 0;
+		}	
 		
 		//pack stuff for client
 		packet = sf::Packet();
 		packet << variable;
-		//pack ships
 		packet << static_cast<unsigned short>(ships.size());
 		for (int i = 0; i < ships.size(); ++i)
 		{
@@ -304,10 +336,6 @@ int main ()
 		{
 			packet << bullets[i];
 		}
-		
-		//pack astroids
-		
-		//pack bullets
 		
 		//send all the clients
 		for (int i = 0; i < clients.size(); ++i)

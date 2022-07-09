@@ -65,13 +65,14 @@ bool isLeft = false;
 bool isRight = false;
 bool isThrottle = false;
 bool isFire = false;
+bool isRestart = false;
 
 float world_width = 600;
 float world_height = 600;
 
 //network
-sf::IpAddress server_ip{"213.164.207.80"};
-//sf::IpAddress server_ip{"127.0.0.1"};
+//sf::IpAddress server_ip{"213.164.207.80"};
+sf::IpAddress server_ip{"127.0.0.1"};
 unsigned short port = 55100; 
 sf::Packet packet;
 sf::UdpSocket socket;
@@ -97,10 +98,11 @@ int main ()
         isRight = sf::Keyboard::isKeyPressed(sf::Keyboard::Right);
         isLeft = sf::Keyboard::isKeyPressed(sf::Keyboard::Left);
         isFire = sf::Keyboard::isKeyPressed(sf::Keyboard::LControl);
+        isRestart = sf::Keyboard::isKeyPressed(sf::Keyboard::R);
         
 		//send inputs to server
 		packet = sf::Packet();
-		packet << id << isLeft << isRight << isThrottle << isFire;
+		packet << id << isLeft << isRight << isThrottle << isFire << isRestart;
 		socket.send(packet, server_ip, port);
 		
 		//handle response from server

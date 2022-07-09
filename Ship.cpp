@@ -28,8 +28,12 @@ void Ship::iterate(int stepin)
 	{
 		float step = static_cast<float>(stepin)/1000.f;
 		//std::cout << "Yupp" << std::endl;
-		if(isLeft) rot -= drot;
-		if(isRight) rot += drot;
+		if(isLeft) drot -= ddrot;
+		if(isRight) drot += ddrot;
+	
+		rot += drot;
+		
+		
 		if (isThrottle) {
 			dx += ship_acceleration * std::cos(3.1415*rot/180.f); 
 			dy += ship_acceleration * std::sin(3.1415*rot/180.f);
@@ -53,6 +57,7 @@ void Ship::iterate(int stepin)
 		//cushion
 		dx *= cushion;
 		dy *= cushion;
+		drot *= rot_cushion;
 	}
 }
 
